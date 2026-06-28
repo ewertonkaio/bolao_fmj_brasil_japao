@@ -90,6 +90,10 @@
   .counter .dot{width:8px;height:8px;border-radius:50%;background:var(--br-green);box-shadow:0 0 8px var(--br-green);}
   .counter b{color:var(--br-yellow);}
 
+  .rule-banner{display:inline-block;margin-top:12px;padding:8px 18px;border-radius:30px;
+    background:linear-gradient(90deg,var(--br-green),#00c24a);color:#fff;font-weight:800;
+    font-size:13.5px;letter-spacing:.01em;box-shadow:0 3px 12px rgba(0,155,58,.35);}
+
   .countdown{margin-top:12px;}
   .countdown .cd-label{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub);font-weight:700;margin-bottom:6px;}
   .countdown .cd-boxes{display:inline-flex;gap:7px;}
@@ -230,6 +234,7 @@
       </span>
     </div>
     <div class="meta">🏟️ Houston · <b>29/06</b> · <b>14h</b> (Brasília) · 16 avos</div>
+    <div class="rule-banner">🎯 Só ganha quem acertar o placar</div>
     <div><span class="counter"><span class="dot"></span><b id="part-count">0</b>&nbsp;participantes</span></div>
     <div id="countdown" class="countdown"></div>
     <button class="share-btn" onclick="compartilhar()">
@@ -321,7 +326,7 @@
         <div class="stat"><div class="v" id="st-placar">—</div><div class="k">Placar + votado</div></div>
       </div>
       <div class="card">
-        <h2 id="resumo-titulo">Quem ganha?</h2>
+        <h2 id="resumo-titulo">Placares mais palpitados</h2>
         <div id="resultado"><div class="loading">Carregando…</div></div>
       </div>
 
@@ -811,36 +816,27 @@ function renderPrize(list, fin){
   const bolo  = total * SHARE_WINNERS;              // 90% pros ganhadores
   const admin = total * SHARE_ADMIN;                // 10% do administrador
 
-  // ganhadores (entre os que pagaram): 1º quem cravou o placar; senão, quem acertou o resultado
-  let ganhadores = [], nivel = '';
+  // ganhadores (entre os que pagaram): SOMENTE quem cravou o placar exato
+  let ganhadores = [];
   if(fin){
-    const cravaram = pagos.filter(g=>g.br===fin.br && g.jp===fin.jp);
-    if(cravaram.length){
-      ganhadores = cravaram; nivel = 'placar';
-    }else{
-      ganhadores = pagos.filter(g=>outcome(g.br,g.jp)===outcome(fin.br,fin.jp));
-      nivel = 'resultado';
-    }
+    ganhadores = pagos.filter(g=>g.br===fin.br && g.jp===fin.jp);
   }
 
   let perwinHtml;
   if(!fin){
     perwinHtml = `<div class="perwin">
       <div class="v">${brl(bolo)}</div>
-      <div class="k">prêmio total a dividir entre os ganhadores</div>
+      <div class="k">prêmio total para quem cravar o placar exato</div>
     </div>
     <div class="hint">O valor por ganhador aparece quando o placar oficial for lançado.</div>`;
   }else if(ganhadores.length===0){
     perwinHtml = `<div class="perwin">
       <div class="v">—</div>
-      <div class="k">ninguém acertou nem o placar nem o resultado</div>
+      <div class="k">ninguém cravou o placar exato</div>
     </div>
     <div class="hint">Os ${brl(bolo)} ficam a critério da casa (acumular, devolver, etc.).</div>`;
   }else{
     const each = bolo / ganhadores.length;
-    const tag = nivel==='placar'
-      ? `🎯 cravaram o placar`
-      : `✓ ninguém cravou — dividido entre quem acertou o resultado`;
     const listaGanhadores = ganhadores.map(g=>{
       const chave = adminUnlocked
         ? `<span style="color:var(--br-yellow)">${escapeHtml(g.chave_pix||'sem chave')}</span>`
@@ -850,7 +846,7 @@ function renderPrize(list, fin){
     }).join('');
     perwinHtml = `<div class="perwin">
       <div class="v">${brl(each)}</div>
-      <div class="k">para cada um dos ${ganhadores.length} ganhador${ganhadores.length>1?'es':''} · ${tag}</div>
+      <div class="k">para cada um dos ${ganhadores.length} ganhador${ganhadores.length>1?'es':''} · 🎯 cravaram o placar</div>
     </div>
     <div style="margin-top:10px">${listaGanhadores}</div>
     ${adminUnlocked?'<div class="hint">Envie o prêmio para as chaves Pix acima.</div>':'<div class="hint">Desbloqueie a área do organizador para ver as chaves Pix.</div>'}`;
@@ -904,11 +900,7 @@ function renderList(list, fin){
   }
   let sorted=[...list].sort((a,b)=>b.ts-a.ts);
   if(fin){
-    const rank=g=>{
-      if(g.br===fin.br && g.jp===fin.jp) return 0;
-      if(outcome(g.br,g.jp)===outcome(fin.br,fin.jp)) return 1;
-      return 2;
-    };
+    const rank=g=> (g.br===fin.br && g.jp===fin.jp) ? 0 : 1;
     sorted.sort((a,b)=>rank(a)-rank(b) || b.ts-a.ts);
   }
   el.innerHTML=sorted.map(g=>{
@@ -923,10 +915,8 @@ function renderList(list, fin){
       : payBadge;
     if(fin){
       const cravou = g.br===fin.br && g.jp===fin.jp;
-      const acertouRes = outcome(g.br,g.jp)===outcome(fin.br,fin.jp);
       if(cravou){ badge='<span class="badge hit">🎯 Cravou</span>'; cls=' is-hit'; }
-      else if(acertouRes){ badge='<span class="badge result">✓ Resultado</span>'; }
-      else { badge='<span class="badge result">✕ Errou</span>'; }
+      else { badge='<span class="badge result">✕ Não cravou</span>'; }
     }
     return `<div class="guess${cls}">
       <div class="avatar" style="background:${colorFor(g.nome)}">${initials(g.nome)}</div>
@@ -948,26 +938,23 @@ function renderResumo(list, fin){
   const titulo=document.getElementById('resumo-titulo');
   if(!total){
     document.getElementById('st-placar').textContent='—';
-    titulo.textContent='Quem ganha?';
+    titulo.textContent='Placares mais palpitados';
     res.innerHTML='<div class="empty"><div class="big">📊</div>Sem dados ainda.</div>';
     return;
   }
-  // placar mais votado
+  // contagem por placar
   const placarCount={};
-  let win={br:0,emp:0,jp:0};
   for(const g of list){
     const k=`${g.br}×${g.jp}`;
     placarCount[k]=(placarCount[k]||0)+1;
-    win[outcome(g.br,g.jp)]++;
   }
-  const topPlacar=Object.entries(placarCount).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('st-placar').textContent=topPlacar[0];
+  const ranking=Object.entries(placarCount).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('st-placar').textContent=ranking[0][0];
 
-  // se já tem resultado oficial -> mostra acertadores
+  // se já tem resultado oficial -> mostra acertadores (só placar exato)
   if(fin){
     titulo.textContent='🏆 Acertadores';
     const cravaram=list.filter(g=>g.br===fin.br && g.jp===fin.jp);
-    const res2=list.filter(g=>!(g.br===fin.br&&g.jp===fin.jp) && outcome(g.br,g.jp)===outcome(fin.br,fin.jp));
     let html='';
     if(cravaram.length){
       html+='<div class="bar-row"><div class="top"><span>🎯 Cravaram o placar exato</span></div></div>';
@@ -975,26 +962,21 @@ function renderResumo(list, fin){
     }else{
       html+='<div class="empty" style="padding:14px"><div class="big">😮</div>Ninguém cravou o placar exato!</div>';
     }
-    if(res2.length){
-      html+='<div class="bar-row" style="margin-top:14px"><div class="top"><span>✓ Acertaram só o vencedor</span></div></div>';
-      html+=res2.map(g=>winnerRow(g,'result')).join('');
-    }
     res.innerHTML=html;
     return;
   }
 
-  // antes do jogo -> tendência
-  titulo.textContent='Quem ganha? (palpites)';
-  const rows=[
-    {lbl:'🇧🇷 Brasil vence',n:win.br,c:'var(--br-green)'},
-    {lbl:'🤝 Empate',n:win.emp,c:'#8ea2c4'},
-    {lbl:'🇯🇵 Japão vence',n:win.jp,c:'var(--jp-red)'},
-  ];
-  res.innerHTML=rows.map(r=>{
-    const pct=total?Math.round(r.n/total*100):0;
+  // antes do jogo -> placares mais palpitados
+  titulo.textContent='Placares mais palpitados';
+  res.innerHTML=ranking.map(([placar,n])=>{
+    const pct=total?Math.round(n/total*100):0;
+    const [b,j]=placar.split('×');
     return `<div class="bar-row">
-      <div class="top"><span>${r.lbl}</span><span class="pct">${r.n} · ${pct}%</span></div>
-      <div class="bar"><i style="width:${pct}%;background:${r.c}"></i></div>
+      <div class="top">
+        <span>🇧🇷 <b style="color:var(--br-yellow)">${b}</b> × <b style="color:#ff5a7a">${j}</b> 🇯🇵</span>
+        <span class="pct">${n} ${n===1?'palpite':'palpites'} · ${pct}%</span>
+      </div>
+      <div class="bar"><i style="width:${pct}%;background:linear-gradient(90deg,var(--br-green),var(--br-yellow))"></i></div>
     </div>`;
   }).join('');
 }

@@ -1,11 +1,13 @@
 // Cria uma cobrança Pix no Mercado Pago e grava o palpite (pendente) no Supabase.
-// Variáveis de ambiente necessárias (Netlify → Site settings → Environment variables):
-//   MP_ACCESS_TOKEN   -> Access Token de PRODUÇÃO do Mercado Pago
-//   SUPABASE_URL      -> ex: https://xxxx.supabase.co
-//   SUPABASE_KEY      -> chave service_role (NÃO a anon) — fica só no servidor
-//   PIX_AMOUNT        -> valor da entrada, ex: 5.00 (opcional, padrão 5)
+// Variáveis de ambiente (Netlify → Site settings → Environment variables):
+//   MP_ACCESS_TOKEN  -> Access Token de PRODUÇÃO do Mercado Pago (APP_USR-...)
+//   SUPABASE_URL     -> https://xxxx.supabase.co
+//   SUPABASE_KEY     -> chave service_role do Supabase
+//   PIX_AMOUNT       -> valor da entrada (opcional, padrão 5)
 
 exports.handler = async (event) => {
+  console.log('criar-pix: início', event.httpMethod);
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
   }
@@ -16,11 +18,12 @@ exports.handler = async (event) => {
   const AMOUNT   = Number(process.env.PIX_AMOUNT || '5');
 
   if (!MP_TOKEN || !SB_URL || !SB_KEY) {
+    console.error('criar-pix: faltam variáveis', { temToken: !!MP_TOKEN, temUrl: !!SB_URL, temKey: !!SB_KEY });
     return json(500, { error: 'Servidor sem configuração. Faltam variáveis de ambiente.' });
   }
 
   let body;
-  try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'JSON inválido' }); }
+  try { body = JSON.parse(event.body || '{}'); } catch (e) { return json(400, { error: 'JSON inválido' }); }
 
   const nome = (body.nome || '').trim();
   const br = parseInt(body.br, 10);
@@ -31,40 +34,23 @@ exports.handler = async (event) => {
   const ts = Date.now();
 
   try {
-    // 0) trava: um palpite por nome. Se já existe, decide se pode ou não criar nova cobrança.
+    // 0) trava: um palpite por nome
+    console.log('criar-pix: checando nome', nome_key);
     const chkRes = await fetch(
       SB_URL + '/rest/v1/palpites?nome_key=eq.' + encodeURIComponent(nome_key) + '&select=pago,mp_payment_id',
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
     );
     if (chkRes.ok) {
       const ex = await chkRes.json();
-      if (ex.length) {
-        // já pagou -> bloqueia de vez
-        if (ex[0].pago) {
-          return json(409, { error: 'ja_existe', message: 'Esse nome já tem um palpite confirmado. Use outro nome.' });
-        }
-        // existe mas ainda não pagou: reaproveita a cobrança Pix anterior (não cria outra)
-        if (ex[0].mp_payment_id) {
-          try {
-            const old = await fetch('https://api.mercadopago.com/v1/payments/' + ex[0].mp_payment_id, {
-              headers: { 'Authorization': 'Bearer ' + MP_TOKEN }
-            });
-            if (old.ok) {
-              const op = await old.json();
-              const otx = op.point_of_interaction && op.point_of_interaction.transaction_data;
-              if (op.status === 'pending' && otx) {
-                return json(200, {
-                  payment_id: op.id, qr_code: otx.qr_code,
-                  qr_code_base64: otx.qr_code_base64, ticket_url: otx.ticket_url || null, reused: true
-                });
-              }
-            }
-          } catch (e) { /* se falhar, segue e cria uma nova abaixo */ }
-        }
+      if (ex.length && ex[0].pago) {
+        return json(409, { error: 'ja_existe', message: 'Esse nome já tem um palpite confirmado. Use outro nome.' });
       }
+    } else {
+      console.error('criar-pix: erro ao checar nome', chkRes.status, await safeText(chkRes));
     }
 
     // 1) cria a cobrança Pix no Mercado Pago
+    console.log('criar-pix: criando pagamento MP, valor', AMOUNT);
     const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
@@ -74,20 +60,29 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         transaction_amount: AMOUNT,
-        description: 'Bolão Brasil x Japão — ' + nome,
+        description: 'Bolao Brasil x Japao - ' + nome,
         payment_method_id: 'pix',
         external_reference: nome_key,
-        payer: { email: sanitizeEmail(nome_key) + '@bolao.local', first_name: nome.substring(0, 40) }
+        payer: { email: sanitizeEmail(nome_key) + '@gmail.com' }
       })
     });
-    const mp = await mpRes.json();
+    const mpText = await safeText(mpRes);
+    let mp;
+    try { mp = JSON.parse(mpText); } catch (e) { mp = {}; }
+    console.log('criar-pix: MP status', mpRes.status);
+
     if (!mpRes.ok) {
-      return json(502, { error: 'Mercado Pago recusou', detail: mp });
+      console.error('criar-pix: MP recusou', mpRes.status, mpText);
+      return json(502, { error: 'Mercado Pago recusou', status: mpRes.status, detail: mp });
     }
     const tx = mp.point_of_interaction && mp.point_of_interaction.transaction_data;
-    if (!tx) return json(502, { error: 'Resposta do MP sem dados de Pix' });
+    if (!tx) {
+      console.error('criar-pix: MP sem transaction_data', mpText);
+      return json(502, { error: 'Resposta do MP sem dados de Pix' });
+    }
 
-    // 2) grava/atualiza o palpite no Supabase (pendente, guardando o id do pagamento)
+    // 2) grava/atualiza o palpite no Supabase
+    console.log('criar-pix: salvando no Supabase');
     const upRes = await fetch(SB_URL + '/rest/v1/palpites?on_conflict=nome_key', {
       method: 'POST',
       headers: {
@@ -99,18 +94,20 @@ exports.handler = async (event) => {
       body: JSON.stringify([{ nome_key, nome, br, jp, pago: false, ts, mp_payment_id: String(mp.id) }])
     });
     if (!upRes.ok) {
-      const t = await upRes.text();
+      const t = await safeText(upRes);
+      console.error('criar-pix: falha Supabase', upRes.status, t);
       return json(502, { error: 'Falha ao salvar no Supabase', detail: t });
     }
 
-    // 3) devolve QR pro frontend
+    console.log('criar-pix: sucesso, payment', mp.id);
     return json(200, {
       payment_id: mp.id,
-      qr_code: tx.qr_code,                 // copia-e-cola
-      qr_code_base64: tx.qr_code_base64,   // imagem PNG em base64
+      qr_code: tx.qr_code,
+      qr_code_base64: tx.qr_code_base64,
       ticket_url: tx.ticket_url || null
     });
   } catch (e) {
+    console.error('criar-pix: exceção', String(e), e && e.stack);
     return json(500, { error: 'Erro inesperado', detail: String(e) });
   }
 };
@@ -122,4 +119,5 @@ function json(code, obj) {
     body: JSON.stringify(obj)
   };
 }
-function sanitizeEmail(s) { return s.replace(/[^a-z0-9]/g, '') || 'palpiteiro'; }
+async function safeText(res) { try { return await res.text(); } catch (e) { return ''; } }
+function sanitizeEmail(s) { return (s.replace(/[^a-z0-9]/g, '') || 'palpiteiro').substring(0, 30); }

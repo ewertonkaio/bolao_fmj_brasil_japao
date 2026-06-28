@@ -43,6 +43,9 @@
   .team-name.jp{color:#ff5a7a;text-shadow:0 0 18px rgba(188,0,45,.3);}
   .vs{font-family:'Anton',sans-serif;font-size:18px;color:var(--sub);}
   .flags{font-size:30px;line-height:1;}
+  .flag-svg{display:inline-flex;}
+  .flag-svg svg{width:clamp(40px,11vw,58px);height:auto;border-radius:4px;
+    box-shadow:0 3px 10px rgba(0,0,0,.35);display:block;}
   .meta{margin-top:10px;font-size:12.5px;color:var(--sub);font-weight:600;}
   .meta b{color:var(--text);}
 
@@ -194,11 +197,23 @@
   <div class="hero">
     <div class="eyebrow">Bolão · Copa do Mundo 2026</div>
     <div class="matchline">
-      <span class="flags">🇧🇷</span>
+      <span class="flag-svg" aria-label="Brasil">
+        <svg viewBox="0 0 70 49" xmlns="http://www.w3.org/2000/svg">
+          <rect width="70" height="49" rx="4" fill="#009b3a"/>
+          <path d="M35 6 L62 24.5 L35 43 L8 24.5 Z" fill="#ffdf00"/>
+          <circle cx="35" cy="24.5" r="10" fill="#002776"/>
+          <path d="M26 22.5 a13 13 0 0 1 18 4" fill="none" stroke="#fff" stroke-width="2.4"/>
+        </svg>
+      </span>
       <span class="team-name br">BRASIL</span>
       <span class="vs">×</span>
       <span class="team-name jp">JAPÃO</span>
-      <span class="flags">🇯🇵</span>
+      <span class="flag-svg" aria-label="Japão">
+        <svg viewBox="0 0 70 49" xmlns="http://www.w3.org/2000/svg">
+          <rect width="70" height="49" rx="4" fill="#fff"/>
+          <circle cx="35" cy="24.5" r="13" fill="#bc002d"/>
+        </svg>
+      </span>
     </div>
     <div class="meta">🏟️ Houston · <b>29/06</b> · <b>14h</b> (Brasília) · 16 avos</div>
     <div><span class="counter"><span class="dot"></span><b id="part-count">0</b>&nbsp;participantes</span></div>

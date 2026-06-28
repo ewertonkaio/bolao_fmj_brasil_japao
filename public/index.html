@@ -157,6 +157,11 @@
   .bar-row{margin-bottom:11px;}
   .bar-row .top{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;}
   .bar-row .top .pct{color:var(--sub);}
+  .sim-prize{font-size:11.5px;color:#3ddc84;margin-top:4px;}
+  .sim-prize b{color:#3ddc84;}
+  .sim-note{font-size:12px;color:var(--sub);background:var(--panel-2);border:1px solid var(--line);
+    border-radius:12px;padding:10px 12px;margin-bottom:14px;line-height:1.45;}
+  .sim-note b{color:var(--br-yellow);}
   .bar{height:9px;border-radius:6px;background:var(--panel-2);overflow:hidden;}
   .bar > i{display:block;height:100%;border-radius:6px;}
 
@@ -932,29 +937,30 @@ function renderList(list, fin){
 }
 
 function renderResumo(list, fin){
-  const total=list.length;
+  const pagos=list.filter(g=>g.pago);   // só quem pagou conta no resumo
+  const total=pagos.length;
   document.getElementById('st-total').textContent=total;
   const res=document.getElementById('resultado');
   const titulo=document.getElementById('resumo-titulo');
   if(!total){
     document.getElementById('st-placar').textContent='—';
     titulo.textContent='Placares mais palpitados';
-    res.innerHTML='<div class="empty"><div class="big">📊</div>Sem dados ainda.</div>';
+    res.innerHTML='<div class="empty"><div class="big">📊</div>Nenhum palpite pago ainda.</div>';
     return;
   }
-  // contagem por placar
+  // contagem por placar (apenas pagos)
   const placarCount={};
-  for(const g of list){
+  for(const g of pagos){
     const k=`${g.br}×${g.jp}`;
     placarCount[k]=(placarCount[k]||0)+1;
   }
   const ranking=Object.entries(placarCount).sort((a,b)=>b[1]-a[1]);
   document.getElementById('st-placar').textContent=ranking[0][0];
 
-  // se já tem resultado oficial -> mostra acertadores (só placar exato)
+  // se já tem resultado oficial -> mostra acertadores (só placar exato, só pagos)
   if(fin){
     titulo.textContent='🏆 Acertadores';
-    const cravaram=list.filter(g=>g.br===fin.br && g.jp===fin.jp);
+    const cravaram=pagos.filter(g=>g.br===fin.br && g.jp===fin.jp);
     let html='';
     if(cravaram.length){
       html+='<div class="bar-row"><div class="top"><span>🎯 Cravaram o placar exato</span></div></div>';
@@ -966,19 +972,24 @@ function renderResumo(list, fin){
     return;
   }
 
-  // antes do jogo -> placares mais palpitados
+  // antes do jogo -> placares mais palpitados (pagos) + simulação de prêmio
   titulo.textContent='Placares mais palpitados';
+  const bolo = (total * PIX_AMOUNT) * SHARE_WINNERS;   // 90% do arrecadado (só pagos)
   res.innerHTML=ranking.map(([placar,n])=>{
     const pct=total?Math.round(n/total*100):0;
     const [b,j]=placar.split('×');
+    const premioCada = n>0 ? bolo/n : 0;               // se esse placar acontecer, cada um leva isso
     return `<div class="bar-row">
       <div class="top">
         <span>🇧🇷 <b style="color:var(--br-yellow)">${b}</b> × <b style="color:#ff5a7a">${j}</b> 🇯🇵</span>
         <span class="pct">${n} ${n===1?'palpite':'palpites'} · ${pct}%</span>
       </div>
       <div class="bar"><i style="width:${pct}%;background:linear-gradient(90deg,var(--br-green),var(--br-yellow))"></i></div>
+      <div class="sim-prize">se acontecer: <b>${brl(premioCada)}</b> para cada um dos ${n}</div>
     </div>`;
   }).join('');
+  res.insertAdjacentHTML('afterbegin',
+    `<div class="sim-note">💰 Bolo atual (90% de ${brl(total*PIX_AMOUNT)}): <b>${brl(bolo)}</b>. Veja abaixo quanto renderia cada placar se ele for o resultado final.</div>`);
 }
 
 function winnerRow(g,kind){

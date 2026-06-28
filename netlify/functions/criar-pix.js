@@ -31,6 +31,12 @@ exports.handler = async (event) => {
   const jp = parseInt(body.jp, 10);
   if (!nome || isNaN(br) || isNaN(jp)) return json(400, { error: 'Dados incompletos' });
 
+  // prazo final: 29/06/2026 14:00 Brasília (17:00 UTC)
+  const DEADLINE = Date.parse('2026-06-29T17:00:00Z');
+  if (Date.now() >= DEADLINE) {
+    return json(403, { error: 'encerrado', message: 'As apostas foram encerradas (29/06 14h, Brasília).' });
+  }
+
   const nome_key = nome.toLowerCase();
   const ts = Date.now();
 

@@ -223,6 +223,9 @@
         <label class="fld" for="nome">Seu nome</label>
         <input type="text" id="nome" placeholder="Ex: João" maxlength="24" autocomplete="off">
 
+        <label class="fld" for="chavepix" style="margin-top:14px">Sua chave Pix (pra receber o prêmio se ganhar)</label>
+        <input type="text" id="chavepix" placeholder="CPF, e-mail, celular ou chave aleatória" maxlength="80" autocomplete="off">
+
         <div class="score-row" style="margin-top:18px">
           <div class="score-box">
             <div class="lbl br">🇧🇷 Brasil</div>
@@ -502,7 +505,7 @@ async function loadAll(){
     if(!r.ok) throw new Error('http '+r.status);
     const rows = await r.json();
     // mapeia colunas do banco -> formato usado no app
-    return rows.map(x=>({nome:x.nome, br:x.br, jp:x.jp, pago:!!x.pago, ts:Number(x.ts), nome_key:x.nome_key}));
+    return rows.map(x=>({nome:x.nome, br:x.br, jp:x.jp, pago:!!x.pago, ts:Number(x.ts), nome_key:x.nome_key, chave_pix:x.chave_pix||''}));
   }catch(e){ console.error(e); return []; }
 }
 // upsert de UM palpite (não sobrescreve a lista toda)
@@ -630,8 +633,10 @@ let pagamentoNomeKey='';
 
 async function irParaPagamento(){
   const nome=document.getElementById('nome').value.trim();
+  const chavePix=document.getElementById('chavepix').value.trim();
   const nota=document.getElementById('nota');
   if(!nome){ nota.textContent='Digite seu nome para palpitar.'; nota.style.color='#ff5a7a'; return; }
+  if(!chavePix){ nota.textContent='Informe sua chave Pix (é por onde você recebe se ganhar).'; nota.style.color='#ff5a7a'; return; }
   nota.style.color='';
 
   // trava client-side: um palpite por nome (se já existe e está pago, bloqueia já aqui)
@@ -657,7 +662,7 @@ async function irParaPagamento(){
   try{
     const r=await fetch('/.netlify/functions/criar-pix',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({nome, br:score.br, jp:score.jp})
+      body: JSON.stringify({nome, br:score.br, jp:score.jp, chave_pix:chavePix})
     });
     const data=await r.json();
     if(r.status===409){   // nome já confirmado (bloqueio do servidor)
@@ -692,7 +697,7 @@ function iniciarPolling(){
         pararPolling();
         el.innerHTML='✅ <b style="color:#3ddc84">Pagamento confirmado!</b> Seu palpite está valendo.';
         showToast('Pagamento confirmado!');
-        setTimeout(()=>{ voltarPalpite(); document.getElementById('nome').value=''; refresh(); }, 2500);
+        setTimeout(()=>{ voltarPalpite(); document.getElementById('nome').value=''; document.getElementById('chavepix').value=''; refresh(); }, 2500);
       }
     }catch(e){ /* tenta de novo no próximo ciclo */ }
   }, 4000);
@@ -790,11 +795,19 @@ function renderPrize(list, fin){
     const tag = nivel==='placar'
       ? `🎯 cravaram o placar`
       : `✓ ninguém cravou — dividido entre quem acertou o resultado`;
+    const listaGanhadores = ganhadores.map(g=>{
+      const chave = adminUnlocked
+        ? `<span style="color:var(--br-yellow)">${escapeHtml(g.chave_pix||'sem chave')}</span>`
+        : 'chave Pix oculta';
+      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)">
+        <span>${escapeHtml(g.nome)}</span><span style="font-size:12px">${chave}</span></div>`;
+    }).join('');
     perwinHtml = `<div class="perwin">
       <div class="v">${brl(each)}</div>
       <div class="k">para cada um dos ${ganhadores.length} ganhador${ganhadores.length>1?'es':''} · ${tag}</div>
     </div>
-    <div class="hint">${ganhadores.map(g=>escapeHtml(g.nome)).join(' · ')}</div>`;
+    <div style="margin-top:10px">${listaGanhadores}</div>
+    ${adminUnlocked?'<div class="hint">Envie o prêmio para as chaves Pix acima.</div>':'<div class="hint">Desbloqueie a área do organizador para ver as chaves Pix.</div>'}`;
   }
 
   wrap.innerHTML = `<div class="prize">

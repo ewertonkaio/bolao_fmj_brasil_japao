@@ -21,6 +21,7 @@ No **SQL Editor** do Supabase, rode (adiciona a coluna que guarda o id do pagame
 
 ```sql
 alter table palpites add column if not exists mp_payment_id text;
+alter table palpites add column if not exists chave_pix text;
 ```
 
 (As tabelas `palpites` e `config` e as policies que você já criou continuam valendo.)

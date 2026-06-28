@@ -26,6 +26,7 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); } catch (e) { return json(400, { error: 'JSON inválido' }); }
 
   const nome = (body.nome || '').trim();
+  const chave_pix = (body.chave_pix || '').trim();
   const br = parseInt(body.br, 10);
   const jp = parseInt(body.jp, 10);
   if (!nome || isNaN(br) || isNaN(jp)) return json(400, { error: 'Dados incompletos' });
@@ -91,7 +92,7 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates'
       },
-      body: JSON.stringify([{ nome_key, nome, br, jp, pago: false, ts, mp_payment_id: String(mp.id) }])
+      body: JSON.stringify([{ nome_key, nome, br, jp, pago: false, ts, mp_payment_id: String(mp.id), chave_pix }])
     });
     if (!upRes.ok) {
       const t = await safeText(upRes);

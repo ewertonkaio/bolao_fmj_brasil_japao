@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bolão · Brasil x Japão</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg:#0a0e1a;
+    --panel:#121829;
+    --panel-2:#1a2236;
+    --line:#243049;
+    --br-green:#009b3a;
+    --br-yellow:#ffdf00;
+    --jp-red:#bc002d;
+    --text:#f3f6ff;
+    --sub:#8ea2c4;
+    --accent:#ffdf00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+  body{min-height:100vh;overflow-x:hidden;}
+
+  .wrap{max-width:520px;margin:0 auto;padding:0 16px 48px;}
+
+  /* HERO */
+  .hero{
+    position:relative;padding:26px 16px 22px;text-align:center;
+    background:
+      radial-gradient(120% 80% at 0% 0%, rgba(0,155,58,.28), transparent 55%),
+      radial-gradient(120% 80% at 100% 0%, rgba(188,0,45,.30), transparent 55%);
+    border-bottom:1px solid var(--line);overflow:hidden;
+  }
+  .eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--sub);font-weight:700;}
+  .matchline{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px;}
+  .team-name{font-family:'Anton',sans-serif;font-size:clamp(30px,9vw,46px);line-height:.9;letter-spacing:.02em;}
+  .team-name.br{color:var(--br-yellow);text-shadow:0 0 18px rgba(255,223,0,.25);}
+  .team-name.jp{color:#ff5a7a;text-shadow:0 0 18px rgba(188,0,45,.3);}
+  .vs{font-family:'Anton',sans-serif;font-size:18px;color:var(--sub);}
+  .flags{font-size:30px;line-height:1;}
+  .meta{margin-top:10px;font-size:12.5px;color:var(--sub);font-weight:600;}
+  .meta b{color:var(--text);}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin:18px 0 16px;}
+  .tab{flex:1;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);
+    color:var(--sub);font-weight:700;font-size:13.5px;cursor:pointer;transition:.18s;text-align:center;}
+  .tab.active{background:var(--br-yellow);color:#10131f;border-color:var(--br-yellow);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;}
+  .card h2{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--sub);margin-bottom:14px;font-weight:700;}
+
+  label.fld{display:block;font-size:12px;color:var(--sub);font-weight:600;margin:0 0 6px;}
+  input[type=text],input[type=password]{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--text);font-size:16px;font-weight:600;font-family:inherit;}
+  input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--accent);}
+
+  /* score picker */
+  .score-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 4px;}
+  .score-box{flex:1;max-width:150px;text-align:center;}
+  .score-box .lbl{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .score-box .lbl.br{color:var(--br-yellow);}
+  .score-box .lbl.jp{color:#ff5a7a;}
+  .stepper{display:flex;align-items:center;justify-content:center;gap:6px;}
+  .stepper button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);
+    color:var(--text);font-size:22px;font-weight:700;cursor:pointer;line-height:1;}
+  .stepper button:active{background:var(--accent);color:#10131f;}
+  .stepper .num{font-family:'Anton',sans-serif;font-size:40px;min-width:46px;text-align:center;}
+  .x-sep{font-family:'Anton',sans-serif;font-size:26px;color:var(--sub);padding-top:18px;}
+
+  .submit{width:100%;margin-top:16px;padding:15px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(90deg,var(--br-green),#00c24a);color:#fff;font-size:16px;font-weight:800;
+    letter-spacing:.02em;font-family:inherit;}
+  .submit:active{transform:scale(.99);}
+  .submit:disabled{opacity:.5;}
+
+  .note{font-size:12px;color:var(--sub);text-align:center;margin-top:10px;}
+
+  /* participantes counter */
+  .counter{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:6px 14px;border-radius:30px;
+    background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;font-weight:700;}
+  .counter .dot{width:8px;height:8px;border-radius:50%;background:var(--br-green);box-shadow:0 0 8px var(--br-green);}
+  .counter b{color:var(--br-yellow);}
+
+  /* pix / pagamento */
+  .pix-card{text-align:center;}
+  .pix-amount{font-family:'Anton',sans-serif;font-size:40px;color:var(--br-green);margin:2px 0 2px;}
+  .pix-sub{font-size:12.5px;color:var(--sub);margin-bottom:16px;}
+  .qr-holder{background:#fff;border-radius:16px;padding:14px;display:inline-block;margin:0 auto 14px;}
+  .qr-holder canvas{display:block;width:200px;height:200px;image-rendering:pixelated;}
+  .pix-key-box{display:flex;gap:8px;align-items:stretch;margin-bottom:8px;}
+  .pix-key-box .val{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;font-size:12px;color:var(--text);font-weight:600;text-align:left;word-break:break-all;
+    display:flex;align-items:center;}
+  .copy-btn{flex:none;padding:0 16px;border-radius:10px;border:none;cursor:pointer;
+    background:var(--br-yellow);color:#10131f;font-weight:800;font-size:13px;font-family:inherit;}
+  .copy-btn:active{transform:scale(.97);}
+  .recv{font-size:12px;color:var(--sub);margin-bottom:16px;}
+  .recv b{color:var(--text);}
+  .paid-btn{width:100%;padding:15px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(90deg,var(--br-green),#00c24a);color:#fff;font-size:16px;font-weight:800;font-family:inherit;}
+  .paid-btn:active{transform:scale(.99);}
+  .back-link{display:inline-block;margin-top:12px;color:var(--sub);font-size:13px;font-weight:600;
+    background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;}
+  .step-tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:4px;}
+
+  .badge.pend{background:#3a2a12;color:#ffb347;border:1px solid #5a3f1a;}
+  .badge.paid{background:rgba(0,155,58,.2);color:#3ddc84;border:1px solid #1f6b3a;}
+  .pay-toggle{flex:none;font-size:11px;font-weight:800;padding:5px 10px;border-radius:20px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--sub);font-family:inherit;}
+
+  /* list */
+  .guess{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .guess:last-child{border-bottom:none;}
+  .avatar{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:15px;color:#10131f;}
+  .guess .who{flex:1;min-width:0;}
+  .guess .who .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .guess .who .tm{font-size:11.5px;color:var(--sub);}
+  .guess .pred{font-family:'Anton',sans-serif;font-size:24px;letter-spacing:.04em;}
+  .guess .pred .s1{color:var(--br-yellow);}
+  .guess .pred .s2{color:#ff5a7a;}
+
+  .empty{text-align:center;padding:30px 10px;color:var(--sub);}
+  .empty .big{font-size:34px;margin-bottom:10px;}
+
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .stat{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;}
+  .stat .v{font-family:'Anton',sans-serif;font-size:30px;}
+  .stat .k{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+  .bar-row{margin-bottom:11px;}
+  .bar-row .top{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;}
+  .bar-row .top .pct{color:var(--sub);}
+  .bar{height:9px;border-radius:6px;background:var(--panel-2);overflow:hidden;}
+  .bar > i{display:block;height:100%;border-radius:6px;}
+
+  /* premiação */
+  .prize{background:linear-gradient(135deg,rgba(255,223,0,.12),rgba(0,155,58,.12));
+    border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;}
+  .prize h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);font-weight:700;margin-bottom:14px;}
+  .prize .pot{text-align:center;margin-bottom:14px;}
+  .prize .pot .v{font-family:'Anton',sans-serif;font-size:44px;color:var(--br-yellow);line-height:1;}
+  .prize .pot .k{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+  .prize .split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .prize .split .box{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;}
+  .prize .split .box .v{font-family:'Anton',sans-serif;font-size:24px;}
+  .prize .split .box .k{font-size:10.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+  .prize .perwin{text-align:center;background:rgba(0,155,58,.18);border:1px solid #1f6b3a;border-radius:12px;padding:14px;}
+  .prize .perwin .v{font-family:'Anton',sans-serif;font-size:32px;color:#3ddc84;line-height:1;}
+  .prize .perwin .k{font-size:12px;color:#9fe6bd;margin-top:4px;font-weight:600;}
+  .prize .hint{font-size:11.5px;color:var(--sub);text-align:center;margin-top:10px;}
+
+  /* share */
+  .share-btn{margin:14px auto 0;display:flex;align-items:center;gap:8px;justify-content:center;
+    padding:11px 20px;border-radius:30px;border:none;cursor:pointer;
+    background:#25d366;color:#06351c;font-weight:800;font-size:14px;font-family:inherit;}
+  .share-btn:active{transform:scale(.98);}
+  .share-btn svg{width:18px;height:18px;}
+
+  /* official score / winners */
+  .official{background:linear-gradient(135deg,rgba(0,155,58,.16),rgba(188,0,45,.16));
+    border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;text-align:center;}
+  .official .ttl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);font-weight:700;}
+  .official .final{font-family:'Anton',sans-serif;font-size:46px;margin-top:6px;letter-spacing:.04em;}
+  .official .final .s1{color:var(--br-yellow);} .official .final .s2{color:#ff5a7a;}
+  .official .who-won{margin-top:4px;font-weight:700;font-size:14px;}
+
+  .badge{flex:none;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;}
+  .badge.hit{background:var(--br-green);color:#fff;}
+  .badge.result{background:var(--panel-2);color:var(--sub);border:1px solid var(--line);}
+  .guess.is-hit{background:rgba(0,155,58,.08);margin:0 -8px;padding:12px 8px;border-radius:10px;border-bottom:1px solid var(--line);}
+
+  .admin summary{cursor:pointer;font-size:13px;color:var(--sub);font-weight:700;padding:4px 0;list-style:none;}
+  .admin summary::-webkit-details-marker{display:none;}
+  .admin summary::before{content:'⚙️ ';}
+  .admin[open] summary{margin-bottom:14px;}
+  .clear-btn{width:100%;margin-top:10px;padding:11px;border-radius:12px;border:1px solid var(--jp-red);
+    background:transparent;color:#ff5a7a;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+
+  .hide{display:none;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);
+    background:var(--br-green);color:#fff;padding:13px 22px;border-radius:30px;font-weight:700;font-size:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;transition:.3s;z-index:50;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  .loading{text-align:center;color:var(--sub);padding:24px;font-size:14px;}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="eyebrow">Bolão · Copa do Mundo 2026</div>
+    <div class="matchline">
+      <span class="flags">🇧🇷</span>
+      <span class="team-name br">BRASIL</span>
+      <span class="vs">×</span>
+      <span class="team-name jp">JAPÃO</span>
+      <span class="flags">🇯🇵</span>
+    </div>
+    <div class="meta">🏟️ Houston · <b>29/06</b> · <b>14h</b> (Brasília) · 16 avos</div>
+    <div><span class="counter"><span class="dot"></span><b id="part-count">0</b>&nbsp;participantes</span></div>
+    <button class="share-btn" onclick="compartilhar()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24s-3.7 8.24-8.24 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+      Convidar pra palpitar
+    </button>
+  </div>
+
+  <div class="wrap">
+    <div class="tabs">
+      <div class="tab active" data-tab="palpitar">Dar palpite</div>
+      <div class="tab" data-tab="palpites">Palpites</div>
+      <div class="tab" data-tab="resumo">Resumo</div>
+    </div>
+
+    <!-- PALPITAR -->
+    <section id="tab-palpitar">
+      <!-- etapa 1: palpite -->
+      <div class="card" id="step-guess">
+        <h2>Seu palpite · R$ 5,00</h2>
+        <label class="fld" for="nome">Seu nome</label>
+        <input type="text" id="nome" placeholder="Ex: João" maxlength="24" autocomplete="off">
+
+        <div class="score-row" style="margin-top:18px">
+          <div class="score-box">
+            <div class="lbl br">🇧🇷 Brasil</div>
+            <div class="stepper">
+              <button type="button" onclick="bump('br',-1)">−</button>
+              <span class="num" id="sbr">1</span>
+              <button type="button" onclick="bump('br',1)">+</button>
+            </div>
+          </div>
+          <div class="x-sep">×</div>
+          <div class="score-box">
+            <div class="lbl jp">🇯🇵 Japão</div>
+            <div class="stepper">
+              <button type="button" onclick="bump('jp',-1)">−</button>
+              <span class="num" id="sjp">0</span>
+              <button type="button" onclick="bump('jp',1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="submit" id="enviar" onclick="irParaPagamento()">Continuar para o pagamento</button>
+        <div class="note" id="nota">⚠️ Um único palpite por pessoa · R$ 5,00 via Pix · não dá pra alterar depois de confirmado</div>
+      </div>
+
+      <!-- etapa 2: pagamento -->
+      <div class="card pix-card hide" id="step-pay">
+        <div class="step-tag">Pagamento Pix</div>
+        <div class="pix-amount">R$ 5,00</div>
+        <div class="pix-sub" id="pay-resumo">Pague pra confirmar seu palpite</div>
+
+        <div id="pay-loading" class="loading">Gerando cobrança Pix…</div>
+
+        <div id="pay-content" class="hide">
+          <div class="qr-holder"><img id="qr-img" alt="QR Code Pix" style="display:block;width:200px;height:200px"></div>
+
+          <div class="pix-key-box">
+            <div class="val" id="pix-code">—</div>
+            <button class="copy-btn" onclick="copiarPix()">Copiar</button>
+          </div>
+          <div class="recv">Escaneie o QR no app do seu banco ou use o copia-e-cola.</div>
+
+          <div id="pay-status" class="note">⏳ Aguardando pagamento… confirma sozinho assim que cair.</div>
+        </div>
+
+        <div><button class="back-link" onclick="voltarPalpite()">← voltar e editar palpite</button></div>
+      </div>
+    </section>
+
+    <!-- PALPITES -->
+    <section id="tab-palpites" class="hide">
+      <div class="card">
+        <h2 id="lista-titulo">Palpites de todos</h2>
+        <div id="lista"><div class="loading">Carregando…</div></div>
+      </div>
+    </section>
+
+    <!-- RESUMO -->
+    <section id="tab-resumo" class="hide">
+      <div id="official-wrap"></div>
+      <div id="prize-wrap"></div>
+      <div class="stat-grid">
+        <div class="stat"><div class="v" id="st-total">—</div><div class="k">Palpites</div></div>
+        <div class="stat"><div class="v" id="st-placar">—</div><div class="k">Placar + votado</div></div>
+      </div>
+      <div class="card">
+        <h2 id="resumo-titulo">Quem ganha?</h2>
+        <div id="resultado"><div class="loading">Carregando…</div></div>
+      </div>
+
+      <details class="card admin">
+        <summary>Lançar placar oficial (organizador)</summary>
+
+        <div id="admin-locked">
+          <p class="note" style="text-align:left;margin:0 0 12px" id="lock-msg">Área do organizador. Digite a senha para liberar.</p>
+          <label class="fld" for="adminpass">Senha</label>
+          <input type="password" id="adminpass" placeholder="••••••" autocomplete="off"
+                 onkeydown="if(event.key==='Enter')desbloquear()">
+          <button class="submit" onclick="desbloquear()" id="unlock-btn">Entrar</button>
+        </div>
+
+        <div id="admin-panel" class="hide">
+          <p class="note" style="text-align:left;margin:0 0 12px">Preencha o resultado final do jogo. O app marca quem cravou o placar.</p>
+          <div class="score-row">
+            <div class="score-box">
+              <div class="lbl br">🇧🇷 Brasil</div>
+              <div class="stepper">
+                <button type="button" onclick="bumpFinal('br',-1)">−</button>
+                <span class="num" id="fbr">0</span>
+                <button type="button" onclick="bumpFinal('br',1)">+</button>
+              </div>
+            </div>
+            <div class="x-sep">×</div>
+            <div class="score-box">
+              <div class="lbl jp">🇯🇵 Japão</div>
+              <div class="stepper">
+                <button type="button" onclick="bumpFinal('jp',-1)">−</button>
+                <span class="num" id="fjp">0</span>
+                <button type="button" onclick="bumpFinal('jp',1)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="submit" onclick="salvarFinal()">Salvar placar oficial</button>
+          <button class="clear-btn" onclick="limparFinal()">Apagar placar oficial</button>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">Palpite registrado!</div>
+
+<script>
+
+/* ===== QR Code generator (qrcode-generator by Kazuhiko Arase, MIT) ===== */
+// qrcode-generator (Kazuhiko Arase, MIT) — trimmed to byte mode + getModuleCount/isDark
+var qrcode = (function() {
+  function QR8bitByte(data){ this.mode=4; this.data=data; this.parsedData=[];
+    for(var i=0,l=this.data.length;i<l;i++){
+      var byteArray=[]; var code=this.data.charCodeAt(i);
+      if(code>0x10000){byteArray[0]=0xF0|((code&0x1C0000)>>>18);byteArray[1]=0x80|((code&0x3F000)>>>12);byteArray[2]=0x80|((code&0xFC0)>>>6);byteArray[3]=0x80|(code&0x3F);}
+      else if(code>0x800){byteArray[0]=0xE0|((code&0xF000)>>>12);byteArray[1]=0x80|((code&0xFC0)>>>6);byteArray[2]=0x80|(code&0x3F);}
+      else if(code>0x80){byteArray[0]=0xC0|((code&0x7C0)>>>6);byteArray[1]=0x80|(code&0x3F);}
+      else{byteArray[0]=code;}
+      this.parsedData.push(byteArray);
+    }
+    this.parsedData=Array.prototype.concat.apply([],this.parsedData);
+    if(this.parsedData.length!=this.data.length){this.parsedData.unshift(191);this.parsedData.unshift(187);this.parsedData.unshift(239);}
+  }
+  QR8bitByte.prototype={getLength:function(){return this.parsedData.length;},write:function(buffer){for(var i=0,l=this.parsedData.length;i<l;i++){buffer.put(this.parsedData[i],8);}}};
+
+  function QRCodeModel(typeNumber,errorCorrectLevel){this.typeNumber=typeNumber;this.errorCorrectLevel=errorCorrectLevel;this.modules=null;this.moduleCount=0;this.dataCache=null;this.dataList=[];}
+  QRCodeModel.prototype={
+    addData:function(data){var n=new QR8bitByte(data);this.dataList.push(n);this.dataCache=null;},
+    isDark:function(row,col){if(row<0||this.moduleCount<=row||col<0||this.moduleCount<=col){throw new Error(row+","+col);}return this.modules[row][col];},
+    getModuleCount:function(){return this.moduleCount;},
+    make:function(){this.makeImpl(false,this.getBestMaskPattern());},
+    makeImpl:function(test,maskPattern){
+      this.moduleCount=this.typeNumber*4+17;this.modules=new Array(this.moduleCount);
+      for(var row=0;row<this.moduleCount;row++){this.modules[row]=new Array(this.moduleCount);for(var col=0;col<this.moduleCount;col++){this.modules[row][col]=null;}}
+      this.setupPositionProbePattern(0,0);this.setupPositionProbePattern(this.moduleCount-7,0);this.setupPositionProbePattern(0,this.moduleCount-7);
+      this.setupPositionAdjustPattern();this.setupTimingPattern();this.setupTypeInfo(test,maskPattern);
+      if(this.typeNumber>=7){this.setupTypeNumber(test);}
+      if(this.dataCache==null){this.dataCache=QRCodeModel.createData(this.typeNumber,this.errorCorrectLevel,this.dataList);}
+      this.mapData(this.dataCache,maskPattern);
+    },
+    setupPositionProbePattern:function(row,col){for(var r=-1;r<=7;r++){if(row+r<=-1||this.moduleCount<=row+r)continue;for(var c=-1;c<=7;c++){if(col+c<=-1||this.moduleCount<=col+c)continue;
+      if((0<=r&&r<=6&&(c==0||c==6))||(0<=c&&c<=6&&(r==0||r==6))||(2<=r&&r<=4&&2<=c&&c<=4)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}},
+    getBestMaskPattern:function(){var minLostPoint=0,pattern=0;for(var i=0;i<8;i++){this.makeImpl(true,i);var lostPoint=QRUtil.getLostPoint(this);if(i==0||minLostPoint>lostPoint){minLostPoint=lostPoint;pattern=i;}}return pattern;},
+    setupTimingPattern:function(){for(var r=8;r<this.moduleCount-8;r++){if(this.modules[r][6]!=null)continue;this.modules[r][6]=(r%2==0);}for(var c=8;c<this.moduleCount-8;c++){if(this.modules[6][c]!=null)continue;this.modules[6][c]=(c%2==0);}},
+    setupPositionAdjustPattern:function(){var pos=QRUtil.getPatternPosition(this.typeNumber);for(var i=0;i<pos.length;i++){for(var j=0;j<pos.length;j++){var row=pos[i],col=pos[j];if(this.modules[row][col]!=null)continue;
+      for(var r=-2;r<=2;r++){for(var c=-2;c<=2;c++){if(r==-2||r==2||c==-2||c==2||(r==0&&c==0)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}}}},
+    setupTypeNumber:function(test){var bits=QRUtil.getBCHTypeNumber(this.typeNumber);for(var i=0;i<18;i++){var mod=(!test&&((bits>>i)&1)==1);this.modules[Math.floor(i/3)][i%3+this.moduleCount-8-3]=mod;}
+      for(var i=0;i<18;i++){var mod=(!test&&((bits>>i)&1)==1);this.modules[i%3+this.moduleCount-8-3][Math.floor(i/3)]=mod;}},
+    setupTypeInfo:function(test,maskPattern){var data=(this.errorCorrectLevel<<3)|maskPattern;var bits=QRUtil.getBCHTypeInfo(data);
+      for(var i=0;i<15;i++){var mod=(!test&&((bits>>i)&1)==1);if(i<6){this.modules[i][8]=mod;}else if(i<8){this.modules[i+1][8]=mod;}else{this.modules[this.moduleCount-15+i][8]=mod;}}
+      for(var i=0;i<15;i++){var mod=(!test&&((bits>>i)&1)==1);if(i<8){this.modules[8][this.moduleCount-i-1]=mod;}else if(i<9){this.modules[8][15-i-1+1]=mod;}else{this.modules[8][15-i-1]=mod;}}
+      this.modules[this.moduleCount-8][8]=(!test);},
+    mapData:function(data,maskPattern){var inc=-1,row=this.moduleCount-1,bitIndex=7,byteIndex=0;
+      for(var col=this.moduleCount-1;col>0;col-=2){if(col==6)col--;
+        while(true){for(var c=0;c<2;c++){if(this.modules[row][col-c]==null){var dark=false;if(byteIndex<data.length){dark=(((data[byteIndex]>>>bitIndex)&1)==1);}
+          var mask=QRUtil.getMask(maskPattern,row,col-c);if(mask){dark=!dark;}this.modules[row][col-c]=dark;bitIndex--;if(bitIndex==-1){byteIndex++;bitIndex=7;}}}
+          row+=inc;if(row<0||this.moduleCount<=row){row-=inc;inc=-inc;break;}}}}
+  };
+  QRCodeModel.PAD0=0xEC;QRCodeModel.PAD1=0x11;
+  QRCodeModel.createData=function(typeNumber,errorCorrectLevel,dataList){var rsBlocks=QRRSBlock.getRSBlocks(typeNumber,errorCorrectLevel);var buffer=new QRBitBuffer();
+    for(var i=0;i<dataList.length;i++){var data=dataList[i];buffer.put(data.mode,4);buffer.put(data.getLength(),QRUtil.getLengthInBits(data.mode,typeNumber));data.write(buffer);}
+    var totalDataCount=0;for(var i=0;i<rsBlocks.length;i++){totalDataCount+=rsBlocks[i].dataCount;}
+    if(buffer.getLengthInBits()>totalDataCount*8){throw new Error("code length overflow. ("+buffer.getLengthInBits()+">"+totalDataCount*8+")");}
+    if(buffer.getLengthInBits()+4<=totalDataCount*8){buffer.put(0,4);}
+    while(buffer.getLengthInBits()%8!=0){buffer.putBit(false);}
+    while(true){if(buffer.getLengthInBits()>=totalDataCount*8)break;buffer.put(QRCodeModel.PAD0,8);if(buffer.getLengthInBits()>=totalDataCount*8)break;buffer.put(QRCodeModel.PAD1,8);}
+    return QRCodeModel.createBytes(buffer,rsBlocks);};
+  QRCodeModel.createBytes=function(buffer,rsBlocks){var offset=0,maxDcCount=0,maxEcCount=0;var dcdata=new Array(rsBlocks.length),ecdata=new Array(rsBlocks.length);
+    for(var r=0;r<rsBlocks.length;r++){var dcCount=rsBlocks[r].dataCount,ecCount=rsBlocks[r].totalCount-dcCount;maxDcCount=Math.max(maxDcCount,dcCount);maxEcCount=Math.max(maxEcCount,ecCount);
+      dcdata[r]=new Array(dcCount);for(var i=0;i<dcdata[r].length;i++){dcdata[r][i]=0xff&buffer.buffer[i+offset];}offset+=dcCount;
+      var rsPoly=QRUtil.getErrorCorrectPolynomial(ecCount);var rawPoly=new QRPolynomial(dcdata[r],rsPoly.getLength()-1);var modPoly=rawPoly.mod(rsPoly);
+      ecdata[r]=new Array(rsPoly.getLength()-1);for(var i=0;i<ecdata[r].length;i++){var modIndex=i+modPoly.getLength()-ecdata[r].length;ecdata[r][i]=(modIndex>=0)?modPoly.get(modIndex):0;}}
+    var totalCodeCount=0;for(var i=0;i<rsBlocks.length;i++){totalCodeCount+=rsBlocks[i].totalCount;}
+    var data=new Array(totalCodeCount),index=0;
+    for(var i=0;i<maxDcCount;i++){for(var r=0;r<rsBlocks.length;r++){if(i<dcdata[r].length){data[index++]=dcdata[r][i];}}}
+    for(var i=0;i<maxEcCount;i++){for(var r=0;r<rsBlocks.length;r++){if(i<ecdata[r].length){data[index++]=ecdata[r][i];}}}
+    return data;};
+
+  var QRMode={MODE_8BIT_BYTE:4};
+  var QRErrorCorrectLevel={L:1,M:0,Q:3,H:2};
+  var QRMaskPattern={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7};
+  var QRUtil={
+    PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],
+    G15:(1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|(1<<0),G18:(1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|(1<<0),G15_MASK:(1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1),
+    getBCHTypeInfo:function(data){var d=data<<10;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)>=0){d^=(QRUtil.G15<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)));}return((data<<10)|d)^QRUtil.G15_MASK;},
+    getBCHTypeNumber:function(data){var d=data<<12;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)>=0){d^=(QRUtil.G18<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)));}return(data<<12)|d;},
+    getBCHDigit:function(data){var digit=0;while(data!=0){digit++;data>>>=1;}return digit;},
+    getPatternPosition:function(typeNumber){return QRUtil.PATTERN_POSITION_TABLE[typeNumber-1];},
+    getMask:function(maskPattern,i,j){switch(maskPattern){case 0:return(i+j)%2==0;case 1:return i%2==0;case 2:return j%3==0;case 3:return(i+j)%3==0;case 4:return(Math.floor(i/2)+Math.floor(j/3))%2==0;case 5:return(i*j)%2+(i*j)%3==0;case 6:return((i*j)%2+(i*j)%3)%2==0;case 7:return((i*j)%3+(i+j)%2)%2==0;default:throw new Error("bad maskPattern:"+maskPattern);}},
+    getErrorCorrectPolynomial:function(errorCorrectLength){var a=new QRPolynomial([1],0);for(var i=0;i<errorCorrectLength;i++){a=a.multiply(new QRPolynomial([1,QRMath.gexp(i)],0));}return a;},
+    getLengthInBits:function(mode,type){if(1<=type&&type<10){return 8;}else if(type<27){return 16;}else if(type<41){return 16;}else{throw new Error("type:"+type);}},
+    getLostPoint:function(qrcode){var moduleCount=qrcode.getModuleCount(),lostPoint=0;
+      for(var row=0;row<moduleCount;row++){for(var col=0;col<moduleCount;col++){var sameCount=0,dark=qrcode.isDark(row,col);for(var r=-1;r<=1;r++){if(row+r<0||moduleCount<=row+r)continue;for(var c=-1;c<=1;c++){if(col+c<0||moduleCount<=col+c)continue;if(r==0&&c==0)continue;if(dark==qrcode.isDark(row+r,col+c)){sameCount++;}}}if(sameCount>5){lostPoint+=(3+sameCount-5);}}}
+      for(var row=0;row<moduleCount-1;row++){for(var col=0;col<moduleCount-1;col++){var count=0;if(qrcode.isDark(row,col))count++;if(qrcode.isDark(row+1,col))count++;if(qrcode.isDark(row,col+1))count++;if(qrcode.isDark(row+1,col+1))count++;if(count==0||count==4){lostPoint+=3;}}}
+      for(var row=0;row<moduleCount;row++){for(var col=0;col<moduleCount-6;col++){if(qrcode.isDark(row,col)&&!qrcode.isDark(row,col+1)&&qrcode.isDark(row,col+2)&&qrcode.isDark(row,col+3)&&qrcode.isDark(row,col+4)&&!qrcode.isDark(row,col+5)&&qrcode.isDark(row,col+6)){lostPoint+=40;}}}
+      for(var col=0;col<moduleCount;col++){for(var row=0;row<moduleCount-6;row++){if(qrcode.isDark(row,col)&&!qrcode.isDark(row+1,col)&&qrcode.isDark(row+2,col)&&qrcode.isDark(row+3,col)&&qrcode.isDark(row+4,col)&&!qrcode.isDark(row+5,col)&&qrcode.isDark(row+6,col)){lostPoint+=40;}}}
+      var darkCount=0;for(var col=0;col<moduleCount;col++){for(var row=0;row<moduleCount;row++){if(qrcode.isDark(row,col)){darkCount++;}}}
+      var ratio=Math.abs(100*darkCount/moduleCount/moduleCount-50)/5;lostPoint+=ratio*10;return lostPoint;}
+  };
+  var QRMath={glog:function(n){if(n<1){throw new Error("glog("+n+")");}return QRMath.LOG_TABLE[n];},gexp:function(n){while(n<0){n+=255;}while(n>=256){n-=255;}return QRMath.EXP_TABLE[n];},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)};
+  for(var i=0;i<8;i++){QRMath.EXP_TABLE[i]=1<<i;}
+  for(var i=8;i<256;i++){QRMath.EXP_TABLE[i]=QRMath.EXP_TABLE[i-4]^QRMath.EXP_TABLE[i-5]^QRMath.EXP_TABLE[i-6]^QRMath.EXP_TABLE[i-8];}
+  for(var i=0;i<255;i++){QRMath.LOG_TABLE[QRMath.EXP_TABLE[i]]=i;}
+  function QRPolynomial(num,shift){if(num.length==undefined){throw new Error(num.length+"/"+shift);}var offset=0;while(offset<num.length&&num[offset]==0){offset++;}this.num=new Array(num.length-offset+shift);for(var i=0;i<num.length-offset;i++){this.num[i]=num[i+offset];}}
+  QRPolynomial.prototype={get:function(index){return this.num[index];},getLength:function(){return this.num.length;},
+    multiply:function(e){var num=new Array(this.getLength()+e.getLength()-1);for(var i=0;i<this.getLength();i++){for(var j=0;j<e.getLength();j++){num[i+j]^=QRMath.gexp(QRMath.glog(this.get(i))+QRMath.glog(e.get(j)));}}return new QRPolynomial(num,0);},
+    mod:function(e){if(this.getLength()-e.getLength()<0){return this;}var ratio=QRMath.glog(this.get(0))-QRMath.glog(e.get(0));var num=new Array(this.getLength());for(var i=0;i<this.getLength();i++){num[i]=this.get(i);}for(var i=0;i<e.getLength();i++){num[i]^=QRMath.gexp(QRMath.glog(e.get(i))+ratio);}return new QRPolynomial(num,0).mod(e);}};
+  function QRRSBlock(totalCount,dataCount){this.totalCount=totalCount;this.dataCount=dataCount;}
+  QRRSBlock.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16]];
+  QRRSBlock.getRSBlocks=function(typeNumber,errorCorrectLevel){var rsBlock=QRRSBlock.getRsBlockTable(typeNumber,errorCorrectLevel);if(rsBlock==undefined){throw new Error("bad rs block @ typeNumber:"+typeNumber+"/errorCorrectLevel:"+errorCorrectLevel);}
+    var length=rsBlock.length/3,list=[];for(var i=0;i<length;i++){var count=rsBlock[i*3+0],totalCount=rsBlock[i*3+1],dataCount=rsBlock[i*3+2];for(var j=0;j<count;j++){list.push(new QRRSBlock(totalCount,dataCount));}}return list;};
+  QRRSBlock.getRsBlockTable=function(typeNumber,errorCorrectLevel){switch(errorCorrectLevel){case QRErrorCorrectLevel.L:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+0];case QRErrorCorrectLevel.M:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+1];case QRErrorCorrectLevel.Q:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+2];case QRErrorCorrectLevel.H:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+3];default:return undefined;}};
+  function QRBitBuffer(){this.buffer=[];this.length=0;}
+  QRBitBuffer.prototype={get:function(index){var bufIndex=Math.floor(index/8);return((this.buffer[bufIndex]>>>(7-index%8))&1)==1;},put:function(num,length){for(var i=0;i<length;i++){this.putBit(((num>>>(length-i-1))&1)==1);}},getLengthInBits:function(){return this.length;},putBit:function(bit){var bufIndex=Math.floor(this.length/8);if(this.buffer.length<=bufIndex){this.buffer.push(0);}if(bit){this.buffer[bufIndex]|=(0x80>>>(this.length%8));}this.length++;}};
+
+  // pick smallest type that fits, ECC level M
+  return function(data){
+    var ec=QRErrorCorrectLevel.M;
+    for(var type=1;type<=20;type++){
+      try{var model=new QRCodeModel(type,ec);model.addData(data);model.make();return model;}
+      catch(e){ /* try next size */ }
+    }
+    throw new Error("data too long for QR");
+  };
+})();
+
+
+/* ===== fim QR ===== */
+
+// ====================================================================
+//  CONFIGURAÇÃO
+//  A chave Pix e a confirmação de pagamento agora são automáticas,
+//  feitas no servidor (Netlify Functions + Mercado Pago).
+//  Aqui só ficam o valor da entrada e a regra de divisão do prêmio.
+// ====================================================================
+const PIX_AMOUNT = 5.00;                   // valor da entrada (deve bater com PIX_AMOUNT do servidor)
+const SHARE_WINNERS = 0.90;                // 90% dividido entre os ganhadores
+const SHARE_ADMIN   = 0.10;                // 10% para o administrador
+// ====================================================================
+
+const score = {br:1, jp:0};
+const finalScore = {br:0, jp:0};
+const COLORS = ['#009b3a','#bc002d','#ffdf00','#3b82f6','#a855f7','#f97316','#14b8a6','#ec4899','#eab308','#06b6d4'];
+
+function bump(t,d){
+  score[t]=Math.max(0,Math.min(20,score[t]+d));
+  document.getElementById(t==='br'?'sbr':'sjp').textContent=score[t];
+}
+function bumpFinal(t,d){
+  finalScore[t]=Math.max(0,Math.min(20,finalScore[t]+d));
+  document.getElementById(t==='br'?'fbr':'fjp').textContent=finalScore[t];
+}
+
+// ====================================================================
+//  SUPABASE  — banco compartilhado na nuvem
+// ====================================================================
+const SUPABASE_URL = "https://zukiviolneukiqjjvakk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1a2l2aW9sbmV1a2lxamp2YWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MTg0ODgsImV4cCI6MjA5ODE5NDQ4OH0.uxTgQit05DWOZcs-ILeLJRJBS5fJI9f0tXomGICzJzI";
+// ====================================================================
+
+const SB_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer '+SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
+const REST = SUPABASE_URL + '/rest/v1';
+let adminUnlocked=false;
+
+// ---- palpites ----
+async function loadAll(){
+  try{
+    const r = await fetch(`${REST}/palpites?select=*`, {headers: SB_HEADERS});
+    if(!r.ok) throw new Error('http '+r.status);
+    const rows = await r.json();
+    // mapeia colunas do banco -> formato usado no app
+    return rows.map(x=>({nome:x.nome, br:x.br, jp:x.jp, pago:!!x.pago, ts:Number(x.ts), nome_key:x.nome_key}));
+  }catch(e){ console.error(e); return []; }
+}
+// upsert de UM palpite (não sobrescreve a lista toda)
+async function upsertPalpite(p){
+  const body = [{nome_key:p.nome_key, nome:p.nome, br:p.br, jp:p.jp, pago:!!p.pago, ts:p.ts}];
+  const r = await fetch(`${REST}/palpites?on_conflict=nome_key`, {
+    method:'POST',
+    headers:{...SB_HEADERS, 'Prefer':'resolution=merge-duplicates'},
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('save '+r.status);
+}
+async function setPago(nome_key, pago){
+  const r = await fetch(`${REST}/palpites?nome_key=eq.${encodeURIComponent(nome_key)}`, {
+    method:'PATCH', headers:SB_HEADERS, body: JSON.stringify({pago})
+  });
+  if(!r.ok) throw new Error('patch '+r.status);
+}
+
+// ---- config (placar final + senha) ----
+async function getConfig(chave){
+  try{
+    const r = await fetch(`${REST}/config?chave=eq.${encodeURIComponent(chave)}&select=valor`, {headers:SB_HEADERS});
+    if(!r.ok) return null;
+    const rows = await r.json();
+    return rows.length ? rows[0].valor : null;
+  }catch(e){ return null; }
+}
+async function setConfig(chave, valor){
+  const r = await fetch(`${REST}/config?on_conflict=chave`, {
+    method:'POST',
+    headers:{...SB_HEADERS, 'Prefer':'resolution=merge-duplicates'},
+    body: JSON.stringify([{chave, valor}])
+  });
+  if(!r.ok) throw new Error('config '+r.status);
+}
+async function delConfig(chave){
+  await fetch(`${REST}/config?chave=eq.${encodeURIComponent(chave)}`, {method:'DELETE', headers:SB_HEADERS});
+}
+
+async function loadFinal(){
+  const v = await getConfig('resultado');
+  if(!v) return null;
+  try{ return JSON.parse(v); }catch(e){ return null; }
+}
+
+// ---- share ----
+async function compartilhar(){
+  const url=location.href;
+  const texto=`⚽ Bolão Brasil x Japão (Copa 2026)!\nDê seu palpite no placar: ${url}`;
+  if(navigator.share){
+    try{ await navigator.share({title:'Bolão Brasil x Japão', text:texto, url}); return; }catch(e){ if(e.name==='AbortError') return; }
+  }
+  // fallback: WhatsApp direto
+  window.open('https://wa.me/?text='+encodeURIComponent(texto),'_blank');
+}
+
+// ---- senha do organizador ----
+async function hashStr(s){
+  const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bolao::'+s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function getStoredPass(){
+  return await getConfig('senha');
+}
+async function desbloquear(){
+  const inp=document.getElementById('adminpass');
+  const msg=document.getElementById('lock-msg');
+  const val=inp.value.trim();
+  if(val.length<4){ msg.textContent='Use uma senha de pelo menos 4 caracteres.'; msg.style.color='#ff5a7a'; return; }
+  const stored=await getStoredPass();
+  const h=await hashStr(val);
+  if(!stored){
+    await setConfig('senha', h);   // primeira vez define a senha
+    showToast('Senha criada!');
+    openPanel();
+  }else if(stored===h){
+    showToast('Liberado!');
+    openPanel();
+  }else{
+    msg.textContent='Senha incorreta. Tente de novo.'; msg.style.color='#ff5a7a';
+    inp.value='';
+  }
+}
+function openPanel(){
+  adminUnlocked=true;
+  document.getElementById('admin-locked').classList.add('hide');
+  document.getElementById('admin-panel').classList.remove('hide');
+  document.getElementById('adminpass').value='';
+  refresh();   // mostra os botões de confirmar pagamento na lista
+}
+async function prepLock(){
+  if(adminUnlocked) return;
+  const stored=await getStoredPass();
+  const msg=document.getElementById('lock-msg');
+  const btn=document.getElementById('unlock-btn');
+  if(!stored){
+    msg.textContent='Primeiro acesso: crie uma senha para proteger esta área.';
+    btn.textContent='Criar senha';
+  }else{
+    msg.textContent='Área do organizador. Digite a senha para liberar.';
+    btn.textContent='Entrar';
+  }
+  msg.style.color='';
+}
+
+function initials(n){
+  const p=n.trim().split(/\s+/);
+  return ((p[0]?.[0]||'')+(p[1]?.[0]||'')).toUpperCase()||'?';
+}
+function colorFor(n){
+  let h=0; for(const c of n) h=(h*31+c.charCodeAt(0))>>>0;
+  return COLORS[h%COLORS.length];
+}
+function fmtTime(ts){
+  const d=new Date(ts);
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+
+         d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ---- pagamento via Mercado Pago (Netlify Functions) ----
+let pixCopiaCola='';
+let statusTimer=null;
+let pagamentoNomeKey='';
+
+async function irParaPagamento(){
+  const nome=document.getElementById('nome').value.trim();
+  const nota=document.getElementById('nota');
+  if(!nome){ nota.textContent='Digite seu nome para palpitar.'; nota.style.color='#ff5a7a'; return; }
+  nota.style.color='';
+
+  // trava client-side: um palpite por nome (se já existe e está pago, bloqueia já aqui)
+  try{
+    const existentes=await loadAll();
+    const ja=existentes.find(g=>g.nome.toLowerCase()===nome.toLowerCase());
+    if(ja && ja.pago){
+      nota.textContent='⚠️ Esse nome já tem um palpite confirmado. Cada pessoa pode palpitar só uma vez. Use outro nome.';
+      nota.style.color='#ff5a7a';
+      return;
+    }
+  }catch(e){ /* se a checagem falhar, o servidor ainda bloqueia */ }
+
+  // mostra a etapa de pagamento em modo "carregando"
+  document.getElementById('pay-resumo').textContent=`${nome} · 🇧🇷 ${score.br} × ${score.jp} 🇯🇵`;
+  document.getElementById('pay-loading').textContent='Gerando cobrança Pix…';
+  document.getElementById('pay-loading').classList.remove('hide');
+  document.getElementById('pay-content').classList.add('hide');
+  document.getElementById('step-guess').classList.add('hide');
+  document.getElementById('step-pay').classList.remove('hide');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  try{
+    const r=await fetch('/.netlify/functions/criar-pix',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({nome, br:score.br, jp:score.jp})
+    });
+    const data=await r.json();
+    if(r.status===409){   // nome já confirmado (bloqueio do servidor)
+      voltarPalpite();
+      nota.textContent='⚠️ '+(data.message||'Esse nome já tem palpite confirmado. Use outro nome.');
+      nota.style.color='#ff5a7a';
+      return;
+    }
+    if(!r.ok) throw new Error(data.error||'falha');
+
+    pixCopiaCola=data.qr_code||'';
+    pagamentoNomeKey=nome.toLowerCase();
+    document.getElementById('qr-img').src='data:image/png;base64,'+data.qr_code_base64;
+    document.getElementById('pix-code').textContent=pixCopiaCola;
+    document.getElementById('pay-loading').classList.add('hide');
+    document.getElementById('pay-content').classList.remove('hide');
+
+    iniciarPolling();          // checa sozinho quando o pagamento cai
+  }catch(e){
+    document.getElementById('pay-loading').textContent='Não deu pra gerar a cobrança. Volte e tente de novo.';
+  }
+}
+
+function iniciarPolling(){
+  pararPolling();
+  const el=document.getElementById('pay-status');
+  statusTimer=setInterval(async ()=>{
+    try{
+      const r=await fetch('/.netlify/functions/status-pix?nome_key='+encodeURIComponent(pagamentoNomeKey));
+      const d=await r.json();
+      if(d.pago){
+        pararPolling();
+        el.innerHTML='✅ <b style="color:#3ddc84">Pagamento confirmado!</b> Seu palpite está valendo.';
+        showToast('Pagamento confirmado!');
+        setTimeout(()=>{ voltarPalpite(); document.getElementById('nome').value=''; refresh(); }, 2500);
+      }
+    }catch(e){ /* tenta de novo no próximo ciclo */ }
+  }, 4000);
+}
+function pararPolling(){ if(statusTimer){ clearInterval(statusTimer); statusTimer=null; } }
+
+function voltarPalpite(){
+  pararPolling();
+  document.getElementById('step-pay').classList.add('hide');
+  document.getElementById('step-guess').classList.remove('hide');
+  // restaura textos
+  document.getElementById('pay-loading').textContent='Gerando cobrança Pix…';
+  document.getElementById('pay-status').innerHTML='⏳ Aguardando pagamento… confirma sozinho assim que cair.';
+}
+function copiarPix(){
+  navigator.clipboard?.writeText(pixCopiaCola).then(
+    ()=>showToast('Código Pix copiado!'),
+    ()=>{ const t=document.createElement('textarea');t.value=pixCopiaCola;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showToast('Código Pix copiado!'); }
+  );
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1900);
+}
+
+async function salvarFinal(){
+  try{
+    await setConfig('resultado', JSON.stringify({br:finalScore.br, jp:finalScore.jp, ts:Date.now()}));
+    showToast('Placar oficial salvo!');
+    await refresh();
+  }catch(e){ showToast('Erro ao salvar.'); }
+}
+async function limparFinal(){
+  try{
+    await delConfig('resultado');
+    showToast('Placar apagado.');
+    await refresh();
+  }catch(e){ showToast('Erro ao apagar.'); }
+}
+
+async function refresh(){
+  const [list, fin] = await Promise.all([loadAll(), loadFinal()]);
+  if(fin){ finalScore.br=fin.br; finalScore.jp=fin.jp;
+    document.getElementById('fbr').textContent=fin.br;
+    document.getElementById('fjp').textContent=fin.jp; }
+  // contador: participantes confirmados (pagos) — mostra confirmados/total
+  const pagos=list.filter(g=>g.pago).length;
+  document.getElementById('part-count').textContent = list.length ? `${pagos}/${list.length}` : '0';
+  renderOfficial(fin, list);
+  renderPrize(list, fin);
+  renderList(list, fin);
+  renderResumo(list, fin);
+}
+
+function outcome(br,jp){ return br>jp?'br':(br<jp?'jp':'emp'); }
+
+function brl(v){ return 'R$ ' + v.toFixed(2).replace('.',','); }
+
+function renderPrize(list, fin){
+  const wrap=document.getElementById('prize-wrap');
+  const pagos=list.filter(g=>g.pago);
+  const total = pagos.length * PIX_AMOUNT;          // só dinheiro confirmado entra no bolo
+  const bolo  = total * SHARE_WINNERS;              // 90% pros ganhadores
+  const admin = total * SHARE_ADMIN;                // 10% do administrador
+
+  // ganhadores (entre os que pagaram): 1º quem cravou o placar; senão, quem acertou o resultado
+  let ganhadores = [], nivel = '';
+  if(fin){
+    const cravaram = pagos.filter(g=>g.br===fin.br && g.jp===fin.jp);
+    if(cravaram.length){
+      ganhadores = cravaram; nivel = 'placar';
+    }else{
+      ganhadores = pagos.filter(g=>outcome(g.br,g.jp)===outcome(fin.br,fin.jp));
+      nivel = 'resultado';
+    }
+  }
+
+  let perwinHtml;
+  if(!fin){
+    perwinHtml = `<div class="perwin">
+      <div class="v">${brl(bolo)}</div>
+      <div class="k">prêmio total a dividir entre os ganhadores</div>
+    </div>
+    <div class="hint">O valor por ganhador aparece quando o placar oficial for lançado.</div>`;
+  }else if(ganhadores.length===0){
+    perwinHtml = `<div class="perwin">
+      <div class="v">—</div>
+      <div class="k">ninguém acertou nem o placar nem o resultado</div>
+    </div>
+    <div class="hint">Os ${brl(bolo)} ficam a critério da casa (acumular, devolver, etc.).</div>`;
+  }else{
+    const each = bolo / ganhadores.length;
+    const tag = nivel==='placar'
+      ? `🎯 cravaram o placar`
+      : `✓ ninguém cravou — dividido entre quem acertou o resultado`;
+    perwinHtml = `<div class="perwin">
+      <div class="v">${brl(each)}</div>
+      <div class="k">para cada um dos ${ganhadores.length} ganhador${ganhadores.length>1?'es':''} · ${tag}</div>
+    </div>
+    <div class="hint">${ganhadores.map(g=>escapeHtml(g.nome)).join(' · ')}</div>`;
+  }
+
+  wrap.innerHTML = `<div class="prize">
+    <h2>💰 Premiação</h2>
+    <div class="pot">
+      <div class="v">${brl(total)}</div>
+      <div class="k">total arrecadado · ${pagos.length} pago${pagos.length===1?'':'s'} × ${brl(PIX_AMOUNT)}</div>
+    </div>
+    <div class="split">
+      <div class="box"><div class="v" style="color:#3ddc84">${brl(bolo)}</div><div class="k">90% ganhadores</div></div>
+      <div class="box"><div class="v" style="color:var(--br-yellow)">${brl(admin)}</div><div class="k">10% administrador</div></div>
+    </div>
+    ${perwinHtml}
+  </div>`;
+}
+
+function renderOfficial(fin, list){
+  const wrap=document.getElementById('official-wrap');
+  if(!fin){ wrap.innerHTML=''; return; }
+  const o=outcome(fin.br,fin.jp);
+  const txt = o==='br'?'🇧🇷 Brasil venceu':(o==='jp'?'🇯🇵 Japão venceu':'🤝 Empate');
+  const acertaram=list.filter(g=>g.br===fin.br && g.jp===fin.jp).length;
+  wrap.innerHTML=`<div class="official">
+    <div class="ttl">Resultado final</div>
+    <div class="final"><span class="s1">${fin.br}</span> × <span class="s2">${fin.jp}</span></div>
+    <div class="who-won">${txt} · ${acertaram} ${acertaram===1?'pessoa cravou':'pessoas cravaram'} o placar</div>
+  </div>`;
+}
+
+// organizador marca/desmarca pagamento (só com a área desbloqueada)
+async function togglePago(nomeKey){
+  if(!adminUnlocked){ showToast('Abra a área do organizador (Resumo) para confirmar pagamentos.'); return; }
+  try{
+    const list=await loadAll();
+    const g=list.find(x=>x.nome_key===nomeKey || x.nome.toLowerCase()===nomeKey);
+    if(!g) return;
+    await setPago(g.nome_key||g.nome.toLowerCase(), !g.pago);
+    await refresh();
+  }catch(e){ showToast('Erro ao atualizar.'); }
+}
+
+function renderList(list, fin){
+  const el=document.getElementById('lista');
+  document.getElementById('lista-titulo').textContent=`Palpites de todos (${list.length})`;
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="big">⚽</div>Ninguém palpitou ainda.<br>Seja o primeiro!</div>';
+    return;
+  }
+  let sorted=[...list].sort((a,b)=>b.ts-a.ts);
+  if(fin){
+    const rank=g=>{
+      if(g.br===fin.br && g.jp===fin.jp) return 0;
+      if(outcome(g.br,g.jp)===outcome(fin.br,fin.jp)) return 1;
+      return 2;
+    };
+    sorted.sort((a,b)=>rank(a)-rank(b) || b.ts-a.ts);
+  }
+  el.innerHTML=sorted.map(g=>{
+    let badge='', cls='';
+    // status de pagamento
+    const payBadge = g.pago
+      ? '<span class="badge paid">✓ Pago</span>'
+      : '<span class="badge pend">⏳ A confirmar</span>';
+    // organizador vê botão pra alternar
+    const payControl = adminUnlocked
+      ? `<button class="pay-toggle" onclick="togglePago('${(g.nome_key||g.nome.toLowerCase()).replace(/'/g,"\\'")}')">${g.pago?'desmarcar':'confirmar'}</button>`
+      : payBadge;
+    if(fin){
+      const cravou = g.br===fin.br && g.jp===fin.jp;
+      const acertouRes = outcome(g.br,g.jp)===outcome(fin.br,fin.jp);
+      if(cravou){ badge='<span class="badge hit">🎯 Cravou</span>'; cls=' is-hit'; }
+      else if(acertouRes){ badge='<span class="badge result">✓ Resultado</span>'; }
+      else { badge='<span class="badge result">✕ Errou</span>'; }
+    }
+    return `<div class="guess${cls}">
+      <div class="avatar" style="background:${colorFor(g.nome)}">${initials(g.nome)}</div>
+      <div class="who">
+        <div class="nm">${escapeHtml(g.nome)}</div>
+        <div class="tm">${fmtTime(g.ts)} · ${g.pago?'pago':'aguardando'}</div>
+      </div>
+      ${badge}
+      ${payControl}
+      <div class="pred"><span class="s1">${g.br}</span> <span style="color:var(--sub)">×</span> <span class="s2">${g.jp}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderResumo(list, fin){
+  const total=list.length;
+  document.getElementById('st-total').textContent=total;
+  const res=document.getElementById('resultado');
+  const titulo=document.getElementById('resumo-titulo');
+  if(!total){
+    document.getElementById('st-placar').textContent='—';
+    titulo.textContent='Quem ganha?';
+    res.innerHTML='<div class="empty"><div class="big">📊</div>Sem dados ainda.</div>';
+    return;
+  }
+  // placar mais votado
+  const placarCount={};
+  let win={br:0,emp:0,jp:0};
+  for(const g of list){
+    const k=`${g.br}×${g.jp}`;
+    placarCount[k]=(placarCount[k]||0)+1;
+    win[outcome(g.br,g.jp)]++;
+  }
+  const topPlacar=Object.entries(placarCount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('st-placar').textContent=topPlacar[0];
+
+  // se já tem resultado oficial -> mostra acertadores
+  if(fin){
+    titulo.textContent='🏆 Acertadores';
+    const cravaram=list.filter(g=>g.br===fin.br && g.jp===fin.jp);
+    const res2=list.filter(g=>!(g.br===fin.br&&g.jp===fin.jp) && outcome(g.br,g.jp)===outcome(fin.br,fin.jp));
+    let html='';
+    if(cravaram.length){
+      html+='<div class="bar-row"><div class="top"><span>🎯 Cravaram o placar exato</span></div></div>';
+      html+=cravaram.map(g=>winnerRow(g,'hit')).join('');
+    }else{
+      html+='<div class="empty" style="padding:14px"><div class="big">😮</div>Ninguém cravou o placar exato!</div>';
+    }
+    if(res2.length){
+      html+='<div class="bar-row" style="margin-top:14px"><div class="top"><span>✓ Acertaram só o vencedor</span></div></div>';
+      html+=res2.map(g=>winnerRow(g,'result')).join('');
+    }
+    res.innerHTML=html;
+    return;
+  }
+
+  // antes do jogo -> tendência
+  titulo.textContent='Quem ganha? (palpites)';
+  const rows=[
+    {lbl:'🇧🇷 Brasil vence',n:win.br,c:'var(--br-green)'},
+    {lbl:'🤝 Empate',n:win.emp,c:'#8ea2c4'},
+    {lbl:'🇯🇵 Japão vence',n:win.jp,c:'var(--jp-red)'},
+  ];
+  res.innerHTML=rows.map(r=>{
+    const pct=total?Math.round(r.n/total*100):0;
+    return `<div class="bar-row">
+      <div class="top"><span>${r.lbl}</span><span class="pct">${r.n} · ${pct}%</span></div>
+      <div class="bar"><i style="width:${pct}%;background:${r.c}"></i></div>
+    </div>`;
+  }).join('');
+}
+
+function winnerRow(g,kind){
+  return `<div class="guess${kind==='hit'?' is-hit':''}">
+    <div class="avatar" style="background:${colorFor(g.nome)}">${initials(g.nome)}</div>
+    <div class="who"><div class="nm">${escapeHtml(g.nome)}</div></div>
+    <div class="pred"><span class="s1">${g.br}</span> <span style="color:var(--sub)">×</span> <span class="s2">${g.jp}</span></div>
+  </div>`;
+}
+
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const id=t.dataset.tab;
+    ['palpitar','palpites','resumo'].forEach(s=>{
+      document.getElementById('tab-'+s).classList.toggle('hide',s!==id);
+    });
+    if(id!=='palpitar') refresh();
+  });
+});
+
+// área do organizador: ajusta texto ao abrir
+document.querySelector('.card.admin').addEventListener('toggle', function(){
+  if(this.open) prepLock();
+});
+
+refresh();
+</script>
+</body>
+</html>
